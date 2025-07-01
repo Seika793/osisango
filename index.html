@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>推しサンゴ診断</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #f0f8ff; }
+    .question { margin-bottom: 2em; }
+    .hidden { display: none; }
+    button { margin-top: 1em; padding: 0.5em 1em; font-size: 1em; }
+    .choices label { display: block; margin: 0.5em 0; }
+  </style>
+</head>
+<body>
+  <h1>推しサンゴ診断</h1>
+   <p>
+    <strong>11タイプの性格診断で、あなたにそっくりな“推しサンゴ”を見つけよう！</strong><br>
+    サンゴたちがキャラクターとして登場し、それぞれの性格や魅力、さらには海を守るための保全活動まで紹介してくれるよ。<br>
+    楽しみながら、自分と似たサンゴを知って、海の世界にも一歩近づいてみよう！
+  </p>
+  <div id="quiz"></div>
+  <div id="result" class="hidden"></div>
+
+  <script>
+    const questions = [
+      { text: "人が多い場所にいると、エネルギーがどんどん減っていく気がする", type: "observer" },
+      { text: "海を見てるだけで、いろんな物語が浮かぶことがある", type: "artist" },
+      { text: "困ってる人がいたら、すぐに声をかけたくなる", type: "helper" },
+      { text: "自分がいないと周りがまとまらないと感じることがある", type: "leader" },
+      { text: "一人で黙々と作業してるときが一番落ち着く", type: "stoic" },
+      { text: "新しいことはとりあえずやってみないと気が済まない", type: "adventurer" },
+      { text: "思い立ったらすぐに予定を変えて行動するタイプだ", type: "free" },
+      { text: "人の感情の変化にはすぐ気づくほうだ", type: "healer" },
+      { text: "感情よりも、まず理屈で物事を考える", type: "logic" },
+      { text: "わいわいした雰囲気の中で自然と話の中心になってることが多い", type: "mood" }
+    ];
+
+    const scores = {
+      healer: 0,
+      observer: 0,
+      mood: 0,
+      logic: 0,
+      leader: 0,
+      stable: 0,
+      helper: 0,
+      adventurer: 0,
+      artist: 0,
+      free: 0,
+      stoic: 0
+    };
+
+    const scale = {
+      "strong-yes": 2,
+      "yes": 1,
+      "neutral": 0,
+      "no": -1,
+      "strong-no": -2
+    };
+
+    const quizDiv = document.getElementById("quiz");
+    const resultDiv = document.getElementById("result");
+
+    let current = 0;
+
+    function showQuestion() {
+      if (current >= questions.length) {
+        showResult();
+        return;
+      }
+      const q = questions[current];
+      quizDiv.innerHTML = `
+        <div class="question">
+          <p>Q${current + 1}. ${q.text}</p>
+          <div class="choices">
+            <label><input type="radio" name="q" value="strong-yes"> 強くそう思う</label>
+            <label><input type="radio" name="q" value="yes"> そう思う</label>
+            <label><input type="radio" name="q" value="neutral"> わからない</label>
+            <label><input type="radio" name="q" value="no"> そう思わない</label>
+            <label><input type="radio" name="q" value="strong-no"> 全くそう思わない</label>
+          </div>
+          <button onclick="submitAnswer()">次へ</button>
+        </div>
+      `;
+    }
+
+    function submitAnswer() {
+      const selected = document.querySelector("input[name='q']:checked");
+      if (!selected) return alert("選択肢を選んでね");
+      const value = scale[selected.value];
+      const type = questions[current].type;
+      scores[type] += value;
+      current++;
+      showQuestion();
+    }
+
+    function showResult() {
+      quizDiv.classList.add("hidden");
+      const maxType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+
+      const coralDescriptions = {
+        healer: "\u3010癒しナチュラル系\u3011ふんわり優しくて、サンゴ礁のなかでもみんなの心を整える存在。",
+        observer: "\u3010静かなる観察者系\u3011沈黙の中で輝くサンゴ。内面は熱く、環境の変化にも鋭い。",
+        mood: "\u3010ムードメーカー系\u3011キラキラ明るくて、場をぱっと明るくするサンゴ。",
+        logic: "\u3010冷静クール系\u3011常にバランスを見極める、理性的な知性派サンゴ。",
+        leader: "\u3010情熱リーダー系\u3011行動力でチームを引っ張る。頼れる主役サンゴ。",
+        stable: "\u3010真面目安定型\u3011地道な努力を怠らない、縁の下の力持ち。",
+        helper: "\u3010おせっかい優等生系\u3011まわりを気にかけ、支える力が強いタイプ。",
+        adventurer: "\u3010ワイルド冒険家系\u3011好奇心旺盛で、海のあちこちを旅するサンゴ。",
+        artist: "\u3010夢見がち芸術家系\u3011カラフルで独創的。自分の世界観を大事にする。",
+        free: "\u3010自由放浪系\u3011潮の流れに身を任せ、気分で動く漂流サンゴ。",
+        stoic: "\u3010ストイック修行僧系\u3011静かに己を鍛えつづける、孤高の職人サンゴ。"
+      };
+
+      resultDiv.classList.remove("hidden");
+      resultDiv.innerHTML = `
+        <h2>あなたにぴったりの推しサンゴは…</h2>
+        <h3>${coralDescriptions[maxType]}</h3>
+      `;
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
